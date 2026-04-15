@@ -8,7 +8,7 @@ int vypis_postavy_stats(){
     string postavy[4] = {"CVRCEK", "SVAB", "CHROUST", "RUMENICE"};
     string stats_kategorie[4] = {"Zivoty", "Energie", "Utok", "Obrana"};
     int postavy_stats[4][4] = {{3, 8, 6, 5}, {8, 3, 5, 6}, {6, 5, 3, 8}, {5, 6, 8, 3}}; //max_hp, max_en, at, df
-    char zvolit = 'a';
+    char zvolit;
 
     do{
     cout << "zvol za koho chces hrat:\n(Cvrcek=1, Svab=2, Chroust=3, Rumenice=4) ";
@@ -47,13 +47,13 @@ int vypis_postavy_stats(){
     }
     cout << "Chces hrat za tuto postavu?(a/n) ";
     cin >> zvolit;
-    }while(zvolit!='a'||zvolit!='A');
+    }while(zvolit!='a'&&zvolit!='A');
     return volba_postavy;
 }
 
 int main(){
     string hrac_jmeno;
-    char jmeno_potvrdit = 'a';
+    char jmeno_potvrdit;
     string postavy[4] = {"CVRCEK", "SVAB", "CHROUST", "RUMENICE"};
     int hrac_max_hp, hrac_hp; //health
     int hrac_max_en, hrac_en; //energy
@@ -104,7 +104,7 @@ int main(){
         cin >> hrac_jmeno;
         cout << "Chceš se jmenovat " << hrac_jmeno << "?(y/n) ";
         cin >> jmeno_potvrdit;
-    }while(jmeno_potvrdit!='a'||jmeno_potvrdit!='A');
+    }while(jmeno_potvrdit!='a'&&jmeno_potvrdit!='A');
 
 return 0;
 }
