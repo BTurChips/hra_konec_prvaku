@@ -4,6 +4,28 @@
 using namespace std;
 
 int vypis_postavy_stats(){
+int hrac_at_sila(int base, int zbran){
+   switch(zbran){
+    case 0:
+        return base;
+        break;
+    case 1:
+        return base+1;
+        break;
+    case 2:
+        return base+3;
+        break;
+    case 3:
+        return base+5;
+        break;
+    case 4:
+        return base+7;
+        break;
+    default:
+        return 0;
+        break;
+   }
+}
     int volba_postavy; //volitelne archetypy hrace
     string postavy[4] = {"CVRCEK", "SVAB", "CHROUST", "RUMENICE"};
     string stats_kategorie[4] = {"Zivoty", "Energie", "Utok", "Obrana"};
@@ -50,7 +72,6 @@ int vypis_postavy_stats(){
     }while(zvolit!='a'&&zvolit!='A');
     return volba_postavy;
 }
-
 int main(){
     string hrac_jmeno;
     char jmeno_potvrdit;
@@ -62,6 +83,8 @@ int main(){
     int hrac_at; //attack
     int hrac_df; //defense
     string hrac_inv[3]; //inventory
+    int hrac_zbran = 0;
+    string zbrane[] = {"Nic", "Klacek", "Siska", "Kamen", "Trn"};
 
     int hrac[9] = {hrac_max_hp, hrac_hp, hrac_max_en, hrac_en, hrac_penize, hrac_xp, hrac_lv, hrac_at, hrac_df};
 
@@ -105,6 +128,7 @@ int main(){
         cout << "Chceš se jmenovat " << hrac_jmeno << "?(y/n) ";
         cin >> jmeno_potvrdit;
     }while(jmeno_potvrdit!='a'&&jmeno_potvrdit!='A');
+
 
 return 0;
 }
