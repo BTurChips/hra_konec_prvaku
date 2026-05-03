@@ -11,12 +11,69 @@ void vypisStats(int HP, int EN){
     cout << "HP: " << HP << endl;
     cout << "EN: " << EN << endl;
 }
+
+void utokSilny(int AT, int &HP, int &EN){
+    if(EN>=10){
+        HP-=(AT*2);
+        EN-=10;
+    }else{
+        cout << "Nedostatek energie pro vyuziti schopnosti." << endl;
+    }
+}
+void utokHromadny(int AT, int &HP1, int &EN){
+    if(EN>=5){
+       HP1-=AT;
+       EN-=5;
+    }else{
+        cout << "Nedostatek energie pro vyuziti schopnosti." << endl;
+    }
+}
+void utokHromadny(int AT, int &HP1, int &HP2, int &EN){
+    if(EN>=5){
+       HP1-=AT;
+       HP2-=AT;
+       EN-=5;
+    }else{
+        cout << "Nedostatek energie pro vyuziti schopnosti." << endl;
+    }
+}
+void utokHromadny(int AT, int &HP1, int &HP2, int &HP3, int &EN){
+    if(EN>=5){
+       HP1-=AT;
+       HP2-=AT;
+       HP3-=AT;
+       EN-=5;
+    }else{
+        cout << "Nedostatek energie pro vyuziti schopnosti." << endl;
+    }
+}
+void blockUtok(){
+    //pristi kolo mensi damage
+}
+int healHP(int x, int &HP, int maxHP, int &EN){
+    int rozdil;
+    rozdil = maxHP-HP;
+    if(EN>=5){
+        if(rozdil<=x){
+            HP+=rozdil;
+            return rozdil;
+        }else{
+            HP+=x;
+            return x;
+        }
+        EN-=5;
+    }else{
+        cout << "Nedostatek energie pro vyuziti schopnosti." << endl;
+        return 0;
+    }
+}
+
 int bojMoznosti(string monstrum, int HPM, int ENM, int ATM){
     int volba;
     cout << "\nCo chces udelat?" << endl;
     cout << "Prohlednout " << monstrum << " = 0" << endl;
     cout << "Utocit na " << monstrum << " = 1" << endl;
-    cout << "Zobrazit schopnosti = 2" << endl; //dodelat schopnosti
+    cout << "Zobrazit schopnosti = 2" << endl;
     do{
     cin >> volba;
     }while(volba<0||volba>2);
@@ -28,9 +85,21 @@ int bojMoznosti(string monstrum, int HPM, int ENM, int ATM){
         cin >> volba;
         }while(volba<1||volba>2);
         }
+    if(volba==2){
+        cout << "\nHromadny utok (5 EN) = 3" << endl;
+        cout << "Silny utok (10 EN) = 4" << endl;
+        cout << "Uzdravit se (5 EN) = 5" << endl;
+        cout << "Zpet na moznosti = 9" << endl;
+        do{
+            cin >> volba;
+        }while(!(volba==3||volba==4||volba==5||volba==9));
+    }
+    if(volba==9){
+        bojMoznosti(monstrum, HPM, ENM, ATM);
+    }
     return volba;
 }
-void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M, int &HP, int &EN, int AT){
+void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M, int &HP, int &EN, int AT, int maxHP){
     int tahHrac; //hrac
     int tahM; //monstrum
     int HPM = monstraStats[M][0];
@@ -43,14 +112,34 @@ void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M, int &HP, in
     while(HP>0&&HPM>0){
         tahHrac = bojMoznosti(monstrum[M], HPM, ENM, ATM);
 
-        if(tahHrac==1){
+        switch(tahHrac){
+        case 1:
             cout << "\nUtocis silou " << AT << endl;
             HPM-=AT;
-            if(HPM<0){
-                HPM=0;
-            }
-            cout << monstrum[M] << " ma " << HPM << " HP" << endl;
+            break;
+        case 3:
+            cout << "Utocis na vsechny mostra " << AT << "x1" <<endl;
+            utokHromadny(AT, HPM, EN);
+            break;
+        case 4:
+            cout << "Utocis silou x2 -> " << AT*2 << endl;
+            utokSilny(AT, HPM, EN);
+            break;
+        case 5:
+            int x;
+            x = healHP(10, HP, maxHP, EN);
+            cout << "Uzdravil jsi se o " << x << "HP" << endl;
+            vypisStats(HP, EN);
+            break;
+        default:
+            cout << "CHYBA" << endl;
+            break;
         }
+
+        if(HPM<0){
+            HPM=0;
+        }
+        cout << monstrum[M] << " ma " << HPM << " HP" << endl;
 
         if(HPM>0){
             cout  << monstrum[M] << " utoci silou " << ATM << endl;
@@ -69,6 +158,7 @@ void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M, int &HP, in
         cout << "Porazil jsi " << monstrum[M]  << "." << endl;
     }
 }
+
 
 void vymaxHPEN(int maxHP, int &HP, int maxEN, int &EN){
     HP = maxHP;
@@ -129,6 +219,6 @@ int main(){
     postava = volbaPostavy(postavy, postavyStats, maxHP, maxEN, AT);
     vymaxHPEN(maxHP, HP, maxEN, EN);
     M1 = rand()%5;
-    bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT);
+    bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT, maxHP);
     return 0;
 }
