@@ -99,7 +99,56 @@ int bojMoznosti(string monstrum, int HPM, int ENM, int ATM){
     }
     return volba;
 }
-void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M, int &HP, int &EN, int AT, int maxHP){
+void tahMonstra(string monstrum[], int M, int &HPM, int &ENM, int monstraStats[5][4], int &HP){
+    int r1 = rand()%5;
+    int r2 = rand()%6+5;
+
+    switch(r1){
+    default:
+        cout << "chyba" << endl;
+        break;
+    case 0:
+    case 1:
+    case 2:
+        cout  << monstrum[M] << " utoci silou " << monstraStats[M][2] << endl;
+        HP-=monstraStats[M][2];
+        break;
+    case 3:
+        if(ENM>=10){
+        cout  << monstrum[M] << " utoci silou x2 -> " << monstraStats[M][2]*2 << endl;
+        HP-=(monstraStats[M][2]*2);
+        ENM-=10;
+        }else{
+        cout  << monstrum[M] << " chce pouzit silny utok, ale nema dost energie" << endl;
+        }
+        break;
+    case 4:
+        int rozdil = monstraStats[M][0] - HPM;
+        if(rozdil>0){
+            cout  << monstrum[M] << " se pokousi uzdravit" << endl;
+            if(ENM>=5){
+                if(rozdil>r2){
+                    cout  << monstrum[M] << " se leci o " << r2 << " zivotu" << endl;
+                    HPM+=r2;
+                }else{
+                    cout  << monstrum[M] << " se leci o " << rozdil << " zivotu" << endl;
+                    HPM+=rozdil;
+                }
+                ENM-=5;
+            }else{
+            cout << "nema dost energie" << endl;
+            }
+        }else{
+            cout << monstrum[M] << " premysli co udela" << endl;
+           }
+        break;
+    }
+
+        if(HP<0){
+            HP=0;
+        }
+}
+void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M, int &HP, int &EN, int AT, int maxHP, int &XP){
     int tahHrac; //hrac
     int tahM; //monstrum
     int HPM = monstraStats[M][0];
@@ -142,20 +191,17 @@ void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M, int &HP, in
         cout << monstrum[M] << " ma " << HPM << " HP" << endl;
 
         if(HPM>0){
-            cout  << monstrum[M] << " utoci silou " << ATM << endl;
-            HP-=ATM;
-            if(HP<0){
-                HP=0;
-            }
-            cout << "Tvuj stav je nyni: " << endl;
-            vypisStats(HP, EN);
-            cout << "------------------" << endl;
+            tahMonstra(monstrum, M, HPM, ENM, monstraStats, HP);
         }
+    cout << "Tvuj stav je nyni: " << endl;
+    vypisStats(HP, EN);
+    cout << "------------------" << endl;
     }
     if(HP==0){
         cout << "Prohral jsi.";
     }else if(HPM==0){
-        cout << "Porazil jsi " << monstrum[M]  << "." << endl;
+        cout << "Porazil jsi " << monstrum[M]  << ". Ziskal jsi " << XPM << " xp" << endl;
+        XP+=XPM;
     }
 }
 
@@ -210,6 +256,7 @@ int main(){
     int postavyStats[3][3] = {{20, 15, 25},{30, 10, 20},{25, 15, 20}}; //maxHP(zivoty), maxEN(energie), baseAP(utok)
     int maxHP, maxEN;
     int HP, EN, AT;
+    int XP=0;
 
     string monstra[5] = {"Mravenec","Beruska","Slimak","Stonozka","Svab"};
     int monstraStats[5][4] = {{30, 0, 5, 2},{50, 5, 8, 5},{65, 10, 3, 6},{35, 15, 12, 10},{75, 15, 10, 13}}; //HP, EN, AT, XP
@@ -219,6 +266,6 @@ int main(){
     postava = volbaPostavy(postavy, postavyStats, maxHP, maxEN, AT);
     vymaxHPEN(maxHP, HP, maxEN, EN);
     M1 = rand()%5;
-    bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT, maxHP);
+    bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT, maxHP, XP);
     return 0;
 }
