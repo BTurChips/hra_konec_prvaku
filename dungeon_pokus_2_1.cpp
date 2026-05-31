@@ -2,7 +2,7 @@
 #include <ctime>
 using namespace std;
 int blokUtok=0; //zabraneni damage pristiho tahu monstra
-int extraReady[3]={0,0,0}; //montrum je ready na extra silny utok;
+int extraReady[3]={0,0,0}; //monstrum je ready na extra silny utok;
 
 void levelXP(int xp, int &level, int &AT, int &maxHP, int &maxEN){
     int aktualniLevel = level;
@@ -39,6 +39,12 @@ void levelXP(int xp, int &level, int &AT, int &maxHP, int &maxEN){
         }
         cout << "Dosahl jsi level " << level << "! Tvoje stats jsou nyni:\nHP max: " << maxHP << "\nEN max: " << maxEN << "\nAT: " << AT << endl;
     }
+}
+int penizeDrop(int Mpocet){
+    int penize=0;
+    int r1 = rand()%11+5;
+    penize = r1*Mpocet;
+    return penize;
 }
 
 void vypisStats(int HP, int maxHP, int EN, int maxEN, int AT){
@@ -283,7 +289,13 @@ void tahHrace2(string monstrum[], int M1, int &HPM1, int maxHPM1, int ENM1, int 
     }while(volba==9);
 
     if(volba==1||volba==4||volba==6){
-       target = volbaTarget(monstrum[M1], monstrum[M2]);
+        if(HPM1>0&&HPM2>0){
+            target = volbaTarget(monstrum[M1], monstrum[M2]);
+        }else if(HPM1>0){
+            target = 1;
+        }else{
+            target = 2;
+        }
     }
 
         switch(volba){
@@ -369,7 +381,23 @@ void tahHrace3(string monstrum[], int M1, int &HPM1, int maxHPM1, int ENM1, int 
     }while(volba==9);
 
     if(volba==1||volba==4||volba==6){
-       target = volbaTarget(monstrum[M1], monstrum[M2], monstrum[M3]);
+        if(HPM1>0&&HPM2>0&&HPM3>0){
+            target = volbaTarget(monstrum[M1], monstrum[M2], monstrum[M3]);
+        }else if(HPM1>0&&HPM2>0){
+            target = volbaTarget(monstrum[M1], monstrum[M2]);
+        }else if(HPM2>0&&HPM3>0){
+            target = volbaTarget(monstrum[M2], monstrum[M3]);
+        }else if(HPM1>0&&HPM3>0){
+            target = volbaTarget(monstrum[M1], monstrum[M3]);
+        }else if(HPM1>0){
+            target = 1;
+        }else if(HPM2>0){
+            target = 2;
+        }else if(HPM3>0){
+            target = 3;
+        }
+
+
     }
 
         switch(volba){
@@ -430,7 +458,7 @@ void tahHrace3(string monstrum[], int M1, int &HPM1, int maxHPM1, int ENM1, int 
         }
 }
 
-void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M, int &HP, int &EN, int AT, int maxHP, int maxEN, int &XP){
+void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M, int &HP, int &EN, int AT, int maxHP, int maxEN, int &XP, int &penize){
     int tahM, target; //monstrum
     int maxHPM = monstraStats[M][0];
     int maxENM = monstraStats[M][1];
@@ -468,13 +496,15 @@ void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M, int &HP, in
     if(HP==0){
         cout << "Prohral jsi.";
     }else if(HPM==0){
-        cout << "Porazil jsi " << monstrum[M]  << ". Ziskal jsi " << XPM << " xp" << endl;
+        int drop = penizeDrop(1);
+        cout << "Porazil jsi " << monstrum[M]  << ". Ziskal jsi " << XPM << " xp a " << drop << " zlata." << endl;
         XP+=XPM;
+        penize+=drop;
     }
     }
 
 }
-void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M1, int M2, int &HP, int &EN, int AT, int maxHP, int maxEN, int &XP){
+void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M1, int M2, int &HP, int &EN, int AT, int maxHP, int maxEN, int &XP, int &penize){
     int target; //monstrum
     int maxHPM1 = monstraStats[M1][0];
     int maxENM1 = monstraStats[M1][1];
@@ -530,12 +560,14 @@ void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M1, int M2, in
     if(HP==0){
         cout << "Prohral jsi.";
     }else if(HPM1==0&&HPM2==0){
-        cout << "Porazil jsi " << monstrum[M1] << " a " << monstrum[M2]  << ". Ziskal jsi " << XPM1+XPM2 << " xp" << endl;
+        int drop = penizeDrop(2);
+        cout << "Porazil jsi " << monstrum[M1] << " a " << monstrum[M2]  << ". Ziskal jsi " << XPM1+XPM2 << " xp a " << drop << " zlata." << endl;
         XP+=(XPM1+XPM2);
+        penize+=drop;
     }
     }
 }
-void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M1, int M2, int M3, int &HP, int &EN, int AT, int maxHP, int maxEN, int &XP){
+void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M1, int M2, int M3, int &HP, int &EN, int AT, int maxHP, int maxEN, int &XP, int &penize){
     int target; //monstrum
     int maxHPM1 = monstraStats[M1][0];
     int maxENM1 = monstraStats[M1][1];
@@ -609,8 +641,10 @@ void bojovaSmycka(string monstrum[5], int monstraStats[5][4], int M1, int M2, in
     if(HP==0){
         cout << "Prohral jsi.";
     }else if(HPM1==0&&HPM2==0){
-        cout << "Porazil jsi " << monstrum[M1] << ", " << monstrum[M2] << " a " << monstrum[M3] << ". Ziskal jsi " << XPM1+XPM2+XPM3 << " xp" << endl;
+        int drop = penizeDrop(3);
+        cout << "Porazil jsi " << monstrum[M1] << ", " << monstrum[M2] << " a " << monstrum[M3] << ". Ziskal jsi " << XPM1+XPM2+XPM3 << " xp a "  << drop << " zlata." << endl;
         XP+=(XPM1+XPM2+XPM3);
+        penize+=drop;
     }
     }
 }
@@ -667,6 +701,7 @@ int main(){
     int HP, EN, AT;
     int XP=0;
     int level = 0;
+    int penize = 0;
 
     string monstra[5] = {"Mravenec","Beruska","Slimak","Stonozka","Svab"};
     int monstraStats[5][4] = {{30, 0, 5, 3},{45, 5, 8, 5},{50, 10, 3, 7},{65, 15, 12, 10},{75, 15, 10, 15}}; //HP, EN, AT, XP
@@ -681,15 +716,18 @@ int main(){
     M3 = rand()%5;
     int bojPocet = rand()%3;
 
+    bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT, maxHP, maxEN, XP, penize);
+    cout << "Mas " << penize << " zlata." << endl;
+
     switch(bojPocet){
     case 0:
-        bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT, maxHP, maxEN, XP);
+        bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT, maxHP, maxEN, XP, penize);
         break;
     case 1:
-        bojovaSmycka(monstra, monstraStats, M1, M2, HP, EN, AT, maxHP, maxEN, XP);
+        bojovaSmycka(monstra, monstraStats, M1, M2, HP, EN, AT, maxHP, maxEN, XP, penize);
         break;
     case 2:
-        bojovaSmycka(monstra, monstraStats, M1, M2, M3, HP, EN, AT, maxHP, maxEN, XP);
+        bojovaSmycka(monstra, monstraStats, M1, M2, M3, HP, EN, AT, maxHP, maxEN, XP, penize);
         break;
     default:
         cout << "chyba" << endl;
