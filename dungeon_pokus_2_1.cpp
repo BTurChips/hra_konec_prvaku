@@ -3,7 +3,7 @@
 using namespace std;
 int blokUtok=0; //zabraneni damage pristiho tahu monstra
 int extraReady[3]={0,0,0}; //monstrum je ready na extra silny utok;
-int tokenyEN=20; //tokeny na doplneni EN behem boje, vyuziti nestoji tah
+int tokenyEN=3; //tokeny na doplneni EN behem boje, vyuziti nestoji tah
 int podZemi=0; //monstrum je pod zemi
 
 void levelXP(int xp, int &level, int &AT, int &maxHP, int &maxEN){
@@ -266,43 +266,7 @@ void tahMiniboss(string miniBoss[], string monstrum[], int MB, int G, int kolo,i
             }
         }
 }
-void tahHlBoss(string hlBoss[3], int faze, int &HPHB, int maxHPHB, int &ENHB, int maxENHB, int ATHB, int &HP, int &maxHP, int &EN, int &AT, int ATsave){
-    string sHB = hlBoss[0];
-    if(faze==1){
-        ATHB=3;
-        cout << sHB << " utoci silou " << ATHB << ".\n";
-        HP-=ATHB;
-        if((maxHPHB-HPHB)>=2){
-        cout << sHB << " se leci o " << 2 << " HP.\n";
-        }else{
-        cout << sHB << " se leci o " << maxHPHB-HPHB << " HP.\n";
-        }
-    }else if(faze==2){
-         ATHB=8;
-        int rM = rand()%4;
-        switch(rM){
-        case 0:
-        case 1:
-        case 2:
-            cout << sHB << " utoci silou " << ATHB << ".\n";
-        HP-=ATHB;
-        case 4:
-            cout << sHB << " utoci silou " << 2*ATHB << ".\n";
-        HP-=(2*ATHB);
-        }
-    }else if(faze==3){
-        cout << sHB << " utoci silou " << ATHB << " jedovatym utokem (permanentni damage).\n";
-        HP-=ATHB;
-        maxHP-=ATHB;
-    }else if(faze==4){
-         cout << sHB << " je " << hlBoss[1] << " a nehybe se.\n";
-         AT=0;
-    }else{
-        AT=ATsave;
-        ATHB=rand()%10+11;
-         cout << hlBoss[2] << " utoci 3x" << ATHB << ".\n";
-    }
-}
+
 void tahHrace1(string monstrum1, int &HPM, int maxHPM, int ENM, int maxENM, int ATM, int &HP, int maxHP, int AT, int &EN, int maxEN){
     int volba=0;
     do{
@@ -633,6 +597,85 @@ void tahHrace3(string monstrum1, string monstrum2, string monstrum3, int &HPM1, 
         }
     }while(volba==0);
 }
+void tahHraceHLB(string monstrum1, int &HPM, int maxHPM, int ATM, int &HP, int maxHP, int AT, int &EN, int maxEN){
+    int volba=0;
+    do{
+        cout << "\nCo chces udelat?" << endl;
+            cout << "Prohlednout nepratele = 0" << endl;
+            cout << "Utocit na nepratele = 1" << endl;
+            cout << "Zobrazit schopnosti = 2" << endl;
+            cout << "Pouzit token = 3" << endl;
+        do{
+            cin >> volba;
+        }while(volba<0||volba>3);
+        if(volba==0){
+            cout << monstrum1 << ": " << endl;
+             cout << "HP: " << HPM << "/" << maxHPM << endl;
+        }else if(volba==3){
+            if(tokenyEN>0){
+                int t=0;
+                if((maxEN-EN)>=5){
+                    t=5;
+                }else{
+                    t=(maxEN-EN);
+                }
+                EN+=t;
+                tokenyEN--;
+                cout << "Energie zvysena o " << t << ", zbyva ti " << tokenyEN << " tokenu.\n";
+            }else{
+                cout << "\nNemas zadne tokeny.\n";
+            }
+            volba=0;
+        }else if(volba==2){
+            cout << "\nSilny utok (10 EN) = 4" << endl;
+            cout << "Uzdravit se (5 EN) = 5" << endl;
+            cout << "Blokovat utok (10 EN) = 6" << endl;
+            cout << "Zpet na moznosti = 0" << endl;
+        do{
+            cin >> volba;
+        }while(!(volba==0||volba==4||volba==5||volba==6));
+        }
+    switch(volba){
+        case 1:
+            cout << "\nUtocis silou " << AT << endl;
+            HPM-=AT;
+            break;
+        case 4:
+            if(EN>=10){
+            cout << "Utocis silou x2 -> " << AT*2 << endl;
+            utokSilny(AT, HPM, EN);
+            }
+            else{
+            cout << "Nedostatek energie pro vyuziti schopnosti." << endl;
+            volba=0;
+            }
+            break;
+        case 5:
+            if(EN>=5){
+            int x;
+            x = healHP(10, HP, maxHP, EN);
+            cout << "Uzdravil jsi se o " << x << "HP" << endl;
+            vypisStats(HP, maxHP, EN, maxEN);
+            }else{
+            cout << "Nedostatek energie pro vyuziti schopnosti." << endl;
+            volba=0;
+            }
+            break;
+        case 6:
+            if(EN>=10){
+            cout << "Blokujes pristi utok nepratele " << monstrum1 << endl;
+            blokUtok++;
+            EN-=10;
+            }else{
+            cout << "Nemas dost energie" << endl;
+            volba=0;
+            }
+            break;
+        default:
+            break;
+        }
+    }while(volba==0);
+}
 
 void bojovaSmycka(string monstrum[], int monstraStats[7][4], int M, int &HP, int &EN, int AT, int maxHP, int maxEN, int &XP, int &penize){
     string monstrum1 = monstrum[M];
@@ -736,6 +779,7 @@ void bojovaSmycka(string monstrum[], int monstraStats[7][4], int M1, int M2, int
     cout << "\nTvuj stav je nyni: " << endl;
     vypisStats(HP, maxHP, EN, maxEN);
     cout << "------------------" << endl;
+    kolo++;
     }
     if(HP==0){
         cout << "Prohral jsi.";
@@ -822,6 +866,7 @@ void bojovaSmycka(string monstrum[], int monstraStats[7][4], int M1, int M2, int
     vypisStats(HP, maxHP, EN, maxEN);
     cout << "------------------" << endl;
     }
+    kolo++;
     if(HP==0){
         cout << "Prohral jsi.";
     }else if(HPM1==0&&HPM2==0){
@@ -972,6 +1017,7 @@ void miniBossfight(string miniBoss[], int MBStats[2][5], int MB, string monstrum
 }
 
 void menuPauza(int &HP, int &EN, int AT, int maxHP, int maxEN, int level, int zlato, int postava, string postavy[]){
+    if(HP>0){
     int volba;
     cout << "\nCo chces delat?\nOdpocinout si = 0\nZobrazit muj stav = 1\nPokracovat v ceste = 2\n";
     do{
@@ -1004,8 +1050,10 @@ void menuPauza(int &HP, int &EN, int AT, int maxHP, int maxEN, int level, int zl
     default:
         cout << "???\n";
     }
+    }
 }
 void menuObchod(int &HP, int &EN, int &AT, int &maxHP, int &maxEN, int &penize){
+    if(HP>0){
     int volba;
     while(volba!=0){
     cout << "\n--OBCHOD-- Mas " << penize << " zlata.\nDoplnit HP a EN(5 zlata) = 1\nZvysit maxHP(8 zlata) = 2\nZvysit maxEN(10 zlata) = 3\nZvysit utok(10 zlata) = 4\nKoupit token energie(5 zlata) = 5\nPokracovat v ceste = 0\n";
@@ -1068,6 +1116,7 @@ void menuObchod(int &HP, int &EN, int &AT, int &maxHP, int &maxEN, int &penize){
         break;
     }
     }
+    }
 }
 
 int volbaPostavy(string postavy[3], int postavyStats[3][3], int &maxHP, int &maxEN, int &AT){
@@ -1125,43 +1174,207 @@ int main(){
     int M1, M2, M3; //monstra
 
     string miniBoss[2] = {"Vceli kralovna", "Cerv"};
-    int MBStats[2][5] = {{120, 40, 10, 50, 40},{150, 0, 10, 60, 35}}; //HP, EN, AT, XP, zlato
-    int MB=0;
+    int MBStats[2][5] = {{120, 40, 10, 50, 40},{110, 0, 10, 40, 35}}; //HP, EN, AT, XP, zlato
+    int MB=1;
 
-    cout << "BROUKOVOD" << endl;
+    cout << "~BROUKOVOD~~~~" << endl;
     cout << "HP jsou zivoty, EN je energie.\nNa zacatek dostavas 3 tokeny na doplneni energie behem boje.\n\n";
     postava = volbaPostavy(postavy, postavyStats, maxHP, maxEN, AT);
     vymaxHPEN(maxHP, HP, maxEN, EN);
     cout << "\nVydavas se na cestu.\n";
 
-    maxHP=300;
-    maxEN=300;
-    AT=60;
-    vymaxHPEN(maxHP, HP, maxEN, EN);
+    M1=0;
+    bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    M1=rand()%2;
+    bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    menuObchod(HP, EN, AT, maxHP, maxEN, penize);
+
+    M1=rand()%2+1;
+    M2=rand()%3+1;
+    bojovaSmycka(monstra, monstraStats, M1, M2, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    MB=1;
+    miniBossfight(miniBoss, MBStats, MB, monstra, monstraStats, 5, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    menuObchod(HP, EN, AT, maxHP, maxEN, penize);
+
+    M1=rand()%2+1;
+    bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    M1=rand()%3+1;
+    M2=rand()%4+1;
+    bojovaSmycka(monstra, monstraStats, M1, M2, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    M1=rand()%3+1;
+    M2=rand()%4+1;
+    bojovaSmycka(monstra, monstraStats, M1, M2, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    MB=0;
+    miniBossfight(miniBoss, MBStats, MB, monstra, monstraStats, 5, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    menuObchod(HP, EN, AT, maxHP, maxEN, penize);
+
+    M1=rand()%2;
+    M2=rand()%3+1;
+    bojovaSmycka(monstra, monstraStats, M1, M2, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    M1=rand()%2+1;
+    M2=rand()%4;
+    bojovaSmycka(monstra, monstraStats, M1, M2, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    M1=rand()%2+1;
+    M2=rand()%4+1;
+    M3=rand()%3+1;
+    bojovaSmycka(monstra, monstraStats, M1, M2, M3, HP, EN, AT, maxHP, maxEN, XP, penize);
+        levelXP(XP, level, AT, maxHP, maxEN);
+        menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
+
+    menuObchod(HP, EN, AT, maxHP, maxEN, penize);
+
+
+
+    //HLAVNI BOSS
+    if(HP>0){
 
     string hlavniBoss[3] = {"Larvog", "Kokon", "Imago"};
-        int HBossStats[5] = {500, 200, 3, 100, 100}; //HP, EN, AT, XP, zlato
-        int maxHPHB = HBossStats[0];
-        int maxENHB = HBossStats[1];
-        int ATHB = HBossStats[2];
-        int XPHB = HBossStats[3];
-        int penizeHB = HBossStats[4];
+        int maxHPHB = 500;
+        int ATHB = 5;
+        int XPHB = 100;
+        int penizeHB = 100;
         int kolo=1;
         int HPHB = maxHPHB;
-        int ENHB = maxENHB;
         int ATsave = AT;
-        int faze=1;
+        int faze=0;
+        int jHB=0;
         cout << "------------------" << "\nUtoci na tebe " << hlavniBoss[0] << "\n------------------" << endl;
     while(HP>0&&HPHB>0){
-            if(kolo%3==0){
+            if(kolo%3==1){
                 faze++;
             }
-        cout << "KOLO " << kolo << ":\n";
+            int rM = rand()%4;
+            int rA = rand()%11+10;
+            AT=ATsave;
+        cout << "KOLO " << kolo << ":\n\n";
         if(HPHB>0){
-            tahHlBoss(hlavniBoss, faze, HPHB, maxHPHB, ENHB, maxENHB, ATHB, HP, maxHP, EN, AT, ATsave);
+            switch(kolo){
+            case 1: //faze 1
+                cout << hlavniBoss[0] << " se rozhlizi.\n";
+                cout << hlavniBoss[0] << " utoci silou " << ATHB << endl;
+                HP-=ATHB;
+                break;
+            case 2:
+                cout << hlavniBoss[0] << " se na neco chysta.\n";
+                cout << hlavniBoss[0] << " utoci silou " << ATHB << endl;
+                HP-=ATHB;
+                if((maxHPHB-HPHB)>=2){
+                    cout << hlavniBoss[0] << " se leci o 2HP\n";
+                }
+                break;
+            case 3:
+                cout << hlavniBoss[0] << " roste.\n";
+                cout << hlavniBoss[0] << " utoci silou " << ATHB << endl;
+                HP-=ATHB;
+                if((maxHPHB-HPHB)>=2){
+                    cout << hlavniBoss[0] << " se leci o 2HP\n";
+                }
+                break;
+            case 4://faze 2
+                cout << hlavniBoss[0] << " utoci silneji.\n";
+                if(rM==0){
+                    cout << hlavniBoss[0] << " utoci silou 2x" << ATHB*2 << " = " << ATHB*4 << endl;
+                    HP-=(4*ATHB);
+                }else{
+                    cout << hlavniBoss[0] << " utoci silou " << ATHB*2 << endl;
+                    HP-=(2*ATHB);
+                }
+                break;
+            case 5:
+                cout << hlavniBoss[0] << " se smeje.\n";
+                if(rM==0){
+                    cout << hlavniBoss[0] << " utoci silou 2x" << ATHB*2 << " = " << ATHB*4 << endl;
+                    HP-=(4*ATHB);
+                }else{
+                    cout << hlavniBoss[0] << " utoci silou " << ATHB*2 << endl;
+                    HP-=(2*ATHB);
+                }
+                break;
+            case 6:
+                cout << hlavniBoss[0] << " roste.\n";
+                if(rM==0){
+                    cout << hlavniBoss[0] << " utoci silou 2x" << ATHB*2 << " = " << ATHB*4 << endl;
+                    HP-=(4*ATHB);
+                }else{
+                    cout << hlavniBoss[0] << " utoci silou " << ATHB*2 << endl;
+                    HP-=(2*ATHB);
+                }
+                break;
+            case 7://faze 3
+                cout << hlavniBoss[0] << " ma jedovaty utok (permanentni damage).\n";
+                cout << hlavniBoss[0] << " utoci silou " << ATHB*2 << endl;
+                HP-=(2*ATHB);
+                maxHP-=(2*ATHB);
+                break;
+            case 8:
+                cout << hlavniBoss[0] << " se raduje.\n";
+                cout << hlavniBoss[0] << " utoci silou " << ATHB*2 << endl;
+                HP-=(2*ATHB);
+                maxHP-=(2*ATHB);
+                break;
+            case 9:
+                cout << hlavniBoss[0] << " se na neco chysta.\n";
+                cout << hlavniBoss[0] << " utoci silou " << ATHB*2 << endl;
+                HP-=(2*ATHB);
+                maxHP-=(2*ATHB);
+                break;
+            case 10://faze 4
+                cout << hlavniBoss[0] << " je nyni " << hlavniBoss[1] << ".\n";
+                jHB=1;
+                AT=0;
+                break;
+            case 11:
+                cout << hlavniBoss[1] << " se nehybe.\n";
+                AT=0;
+                break;
+            case 12:
+                cout << hlavniBoss[1] << " se chechta.\n";
+                AT=0;
+                break;
+            case 13://faze 5
+                cout << "Z " << hlavniBoss[1] << "u se stava " << hlavniBoss[2] << "!\n";
+                cout << hlavniBoss[2] << " utoci silou 3x" << rA << " = " << 3*rA << endl;
+                HP-=(3*rA);
+                jHB=2;
+                break;
+            default:
+                cout << hlavniBoss[2] << " utoci silou 3x" << rA << " = " << 3*rA << endl;
+                HP-=(3*rA);
+                break;
+            }
         }
         if(HP>0){
-        tahHrace1(hlavniBoss[0], HPHB, maxHPHB, ENHB, maxENHB, ATHB, HP, maxHP, AT, EN, maxEN);
+        tahHraceHLB(hlavniBoss[jHB], HPHB, maxHPHB, ATHB, HP, maxHP, AT, EN, maxEN);
         }
         if(HPHB<0){
             HPHB=0;
@@ -1177,7 +1390,7 @@ int main(){
             ATHB = 0;
             blokUtok--;
         }else{
-            ATHB = HBossStats[2];
+            ATHB = 5;
         }
         cout << "\nTvuj stav je nyni: " << endl;
     vypisStats(HP, maxHP, EN, maxEN);
@@ -1188,22 +1401,14 @@ int main(){
         cout << "Prohral jsi.";
     }else if(HPHB==0){
         int drop = penizeHB;
-        cout << "Porazil jsi " << hlavniBoss[2]  << ". Ziskal jsi " << XPHB << " xp a " << drop << " zlata." << endl;
+        cout << "Porazil jsi " << hlavniBoss[jHB]  << ". Ziskal jsi " << XPHB << " xp a " << drop << " zlata." << endl;
         XP+=XPHB;
         penize+=drop;
+        cout << "Konec hry! Vyhral jsi :)" << endl;
+    }
     }
 
-    /*miniBossfight(miniBoss, MBStats, 0, monstra, monstraStats, 5, HP, EN, AT, maxHP, maxEN, XP, penize);
-
-    M1 = rand()%5;
-    M2 = rand()%5;
-    M3 = rand()%5;
-    int bojPocet = rand()%3;
-
-    menuPauza(HP, EN, AT, maxHP, maxEN, level, penize, postava, postavy);
-    menuObchod(HP, EN, AT, maxHP, maxEN, penize);
-
-    switch(bojPocet){
+    /*switch(bojPocet){
     case 0:
         bojovaSmycka(monstra, monstraStats, M1, HP, EN, AT, maxHP, maxEN, XP, penize);
         break;
@@ -1216,8 +1421,7 @@ int main(){
     default:
         cout << "chyba" << endl;
         break;
-    }
-    levelXP(XP, level, AT, maxHP, maxEN);*/
+    }*/
 
     return 0;
 }
